@@ -3,11 +3,14 @@ package com.example.insighttest;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -31,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     EditText mSolEditText;
 
     private InsightPhotoAdapter mAdapter;
+    private InsightPhotoViewModel mViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,68 +45,38 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(layoutManager);
         mAdapter = new InsightPhotoAdapter();
         mRecyclerView.setAdapter(mAdapter);
+        setupViewModel();
+    }
 
+    private void setupViewModel(){
+        mViewModel = ViewModelProviders.of(this).get(InsightPhotoViewModel.class);
+        mViewModel.getInsightResponse().observe(this, new Observer<InsightResponse>() {
+            @Override
+            public void onChanged(InsightResponse insightResponse) {
+                Log.d("LOG", "onChanged");
+                if(insightResponse != null){
+                    if(insightResponse.getErrorMessage() != null){
+                        showFailure("No Photos");
+                    }else {
+                        List<InsightPhoto> photoList = insightResponse.getItems();
+                        mAdapter.setData(photoList);
+                    }
+
+                } else {
+                    showFailure("Failure");
+                }
+            }
+        });
     }
 
     @OnClick(R.id.search_button)
     public void onSearchClick(){
-       /* Retrofit retrofit = new Retrofit.Builder().baseUrl("https://mars.nasa.gov/api/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-
-        InsightPhotoEndpoint insightApi = retrofit.create(InsightPhotoEndpoint.class);
-
-        Call<InsightResponse> call = insightApi.listPhotos();
-        call.enqueue(new Callback<InsightResponse>() {
-            @Override
-            public void onResponse(Call<InsightResponse> call, Response<InsightResponse> response) {
-                if(response.body() == null){
-                    showFailure();
-                }else {
-                    InsightResponse insightResponse = response.body();
-                    InsightPhoto insightPhoto = insightResponse.getItems().get(0);
-                    List<InsightPhoto> photoList = insightResponse.getItems();
-                    mAdapter.setData(photoList);
-                    String url = insightPhoto.getUrl();
-                    String title = insightPhoto.getTitle();
-                    //showResponse(title);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<InsightResponse> call, Throwable t) {
-                showFailure();
-            }
-        });*/
-
-       InsightRepository repository = InsightRepository.getInstance();
        String solInput = mSolEditText.getText().toString();
        if(solInput.isEmpty()){
            return;
        }
        int sol = Integer.valueOf(solInput);
-       LiveData<InsightResponse> responseLiveData = repository.getPhotosBySol(sol);
-       responseLiveData.observe(this, new Observer<InsightResponse>() {
-           @Override
-           public void onChanged(InsightResponse insightResponse) {
-               Log.d("LOG", "onChanged");
-               if(insightResponse != null){
-                   if(insightResponse.getErrorMessage() != null){
-                       showFailure("No Photos");
-                   }else {
-                       List<InsightPhoto> photoList = insightResponse.getItems();
-                       mAdapter.setData(photoList);
-                   }
-
-               } else {
-                   showFailure("Failure");
-               }
-           }
-       });
-
-
-
+       mViewModel.searchBySol(sol);
 
     }
 
