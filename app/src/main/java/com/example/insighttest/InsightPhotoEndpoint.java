@@ -2,6 +2,7 @@ package com.example.insighttest;
 
 import java.util.List;
 
+import io.reactivex.Single;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
@@ -26,5 +27,7 @@ public interface InsightPhotoEndpoint {
     @GET("v1/raw_image_items")
     Call<InsightResponse> getPhotosBySol(@Query("condition_1") String mission,@Query("condition_2") String sol);
 
+    @GET("v1/raw_image_items")
+    Single<InsightResponse> getPhotosBySolSingle(@Query("condition_1") String mission, @Query("condition_2") String sol);
 
 }

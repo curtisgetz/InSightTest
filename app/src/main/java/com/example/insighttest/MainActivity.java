@@ -68,6 +68,15 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        displaySolRange();
+    }
+
+    private void displaySolRange() {
+        String minSol = "0";
+        String dash = "-";
+        String maxSol = String.valueOf(mViewModel.getMaxSolEstimate());
+        mSolEditText.setHint("Search Sol: " + minSol + dash + maxSol);
     }
 
     @OnClick(R.id.search_button)
