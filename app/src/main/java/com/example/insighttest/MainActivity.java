@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("LOG", "onChanged");
                 if(insightResponse != null){
                     if(insightResponse.getErrorMessage() != null){
-                        showFailure("No Photos");
+                        showFailure("No Photos On This Sol");
                     }else {
                         List<InsightPhoto> photoList = insightResponse.getItems();
                         mAdapter.setData(photoList);
@@ -78,6 +78,16 @@ public class MainActivity extends AppCompatActivity {
        int sol = Integer.valueOf(solInput);
        mViewModel.searchBySol(sol);
 
+    }
+
+    @OnClick(R.id.prev_sol)
+    public void onPrevSolClick(){
+        mViewModel.searchPrevSol();
+    }
+
+    @OnClick(R.id.next_sol)
+    public void onNextSolClick(){
+        mViewModel.searchNextSol();
     }
 
     public void showResponse(String url){

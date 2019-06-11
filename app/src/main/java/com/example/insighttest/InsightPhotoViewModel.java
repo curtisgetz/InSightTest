@@ -31,6 +31,7 @@ public class InsightPhotoViewModel extends ViewModel {
     private final static String SOL_QUERY_APPEND = ":sol";
     private final static String MISSION_QUERY_APPEND = "insight:mission";
     private int mMaxSolEstimate;
+    private int mCurrentSol = 0;
 
     private final DateTime mInsightSolZero = new DateTime(DateTime.parse("2018-11-26T00:00:00.000Z"));
     private DateTime mCurrentDate = new DateTime(DateTimeZone.UTC);
@@ -48,7 +49,6 @@ public class InsightPhotoViewModel extends ViewModel {
     }
 
     public void searchBySol(int sol){
-
         String solSearch = sol + SOL_QUERY_APPEND;
         Call<InsightResponse> insightCall = mApiService.getPhotosBySol(MISSION_QUERY_APPEND, solSearch);
         insightCall.enqueue(new Callback<InsightResponse>() {
@@ -73,10 +73,25 @@ public class InsightPhotoViewModel extends ViewModel {
         });
     }
 
+    public void searchPrevSol(){
+        if(mCurrentSol == 0) {
+            searchBySol(mCurrentSol);
+        }else{
+            searchBySol(mCurrentSol--);
+        }
+    }
+
+    public void searchNextSol(){
+        searchBySol(mCurrentSol++);
+    }
+
     public LiveData<InsightResponse> getInsightResponse(){
         return mLiveInsightResponse;
     }
 
+    public int getCurrentSol(){
+        return mCurrentSol;
+    }
     /**
      * Get a rough estimation of Max Sol
      * @return estimated max sol
