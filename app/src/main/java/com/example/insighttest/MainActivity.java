@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
                     }else {
                         List<InsightPhoto> photoList = insightResponse.getItems();
                         mAdapter.setData(photoList);
+                        mSolEditText.setText(String.valueOf(mViewModel.getCurrentSol()));
                     }
 
                 } else {
@@ -85,8 +86,14 @@ public class MainActivity extends AppCompatActivity {
        if(solInput.isEmpty()){
            return;
        }
-       int sol = Integer.valueOf(solInput);
-       mViewModel.searchBySol(sol);
+
+       try {
+           int sol = Integer.valueOf(solInput);
+           mViewModel.searchFromInput(sol);
+       }catch (NumberFormatException e){
+           Log.e("Log", e.getMessage());
+           mViewModel.searchFromInput(0);
+       }
 
     }
 

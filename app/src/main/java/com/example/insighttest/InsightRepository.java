@@ -1,14 +1,9 @@
 package com.example.insighttest;
 
+
 import android.util.Log;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-
 import io.reactivex.Single;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -17,6 +12,7 @@ public class InsightRepository {
 
     private final static String SOL_QUERY_APPEND = ":sol";
     private final static String MISSION_QUERY_APPEND = "insight:mission";
+    private final static String API_BASE_URL = "https://mars.nasa.gov/api/";
 
     private static InsightRepository sInstance;
     private InsightPhotoEndpoint mApiService;
@@ -29,7 +25,7 @@ public class InsightRepository {
     }
 
     private  InsightRepository(){
-        Retrofit retrofit = new Retrofit.Builder().baseUrl("https://mars.nasa.gov/api/")
+        Retrofit retrofit = new Retrofit.Builder().baseUrl(API_BASE_URL)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
@@ -40,8 +36,10 @@ public class InsightRepository {
 
     public Single<InsightResponse> getPhotosSingle(int sol){
         String solSearch = sol + SOL_QUERY_APPEND;
+        Log.d("LOG", API_BASE_URL + solSearch);
         return mApiService.getPhotosBySolSingle(MISSION_QUERY_APPEND, solSearch);
     }
+
 
 
 

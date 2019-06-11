@@ -20,15 +20,17 @@ import io.reactivex.schedulers.Schedulers;
 
 public class InsightPhotoViewModel extends ViewModel {
 
-
+    private final static long SOL_IN_MILLISECONDS = 88775244L;
+    private final static DateTime mInsightSolZero = new DateTime(DateTime.parse("2018-11-26T00:00:00.000Z"));
+    private final static int MAX_QUERY = 25;
+    private static int mCurrentQuery = 0;
 
     private MutableLiveData<InsightResponse> mLiveInsightResponse = new MutableLiveData<>();
     private InsightRepository mRepository;
-    private final static long SOL_IN_MILLISECONDS = 88775244L;
     private int mMaxSolEstimate;
     private int mCurrentSol = 0;
 
-    private final DateTime mInsightSolZero = new DateTime(DateTime.parse("2018-11-26T00:00:00.000Z"));
+
     private DateTime mCurrentDate = new DateTime(DateTimeZone.UTC);
 
 
@@ -38,9 +40,14 @@ public class InsightPhotoViewModel extends ViewModel {
         Log.d("LOG", "ViewModel created");
     }
 
-    public void searchBySol(int sol){
-        mCurrentSol = sol;
-        mRepository.getPhotosSingle(sol)
+    public void searchFromInput(int sol){
+        mCurrentQuery = 0;
+        searchBySol(sol);
+    }
+
+    private void searchBySol(int sol){
+        mCurrentSol = validateSolInRange(sol);
+        mRepository.getPhotosSingle(mCurrentSol)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(getSingleObserver());
@@ -56,7 +63,7 @@ public class InsightPhotoViewModel extends ViewModel {
             @Override
             public void onSuccess(InsightResponse insightResponse) {
                 Log.d("LOG", "Success");
-                mLiveInsightResponse.postValue(insightResponse);
+                checkIfActive(insightResponse);
             }
 
             @Override
@@ -66,16 +73,46 @@ public class InsightPhotoViewModel extends ViewModel {
         };
     }
 
+    private void checkIfActive(InsightResponse insightResponse){
+        Log.d("LOG", "Query Number = " + mCurrentQuery);
+        if(insightResponse.getItems().isEmpty()){
+            if(mCurrentQuery < MAX_QUERY && mCurrentSol < mMaxSolEstimate && mCurrentSol >=0){
+                mCurrentSol++;
+                mCurrentQuery++;
+                Log.d("LOG", "Trying new sol " + mCurrentSol);
+                searchBySol(mCurrentSol);
+            }
+        }else {
+            mCurrentQuery = 0;
+            mLiveInsightResponse.postValue(insightResponse);
+        }
+    }
+
+
+    private int validateSolInRange(int sol){
+        if(sol < 0){
+            return 0;
+        }else if(sol > mMaxSolEstimate){
+            return mMaxSolEstimate;
+        }else {
+            return sol;
+        }
+    }
+
     public void searchPrevSol(){
         if(mCurrentSol > 0) {
             mCurrentSol--;
         }
-        searchBySol(mCurrentSol);
+        searchFromInput(mCurrentSol);
     }
 
     public void searchNextSol(){
-        mCurrentSol++;
-        searchBySol(mCurrentSol);
+        if(mCurrentSol > mMaxSolEstimate){
+            mCurrentSol = mMaxSolEstimate;
+        }else {
+            mCurrentSol++;
+        }
+        searchFromInput(mCurrentSol);
     }
 
     public int getMaxSolEstimate(){
@@ -89,6 +126,7 @@ public class InsightPhotoViewModel extends ViewModel {
     public int getCurrentSol(){
         return mCurrentSol;
     }
+
     /**
      * Get an estimation of Max Sol
      * @return estimated max sol
