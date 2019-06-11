@@ -49,7 +49,8 @@ public class InsightPhotoViewModel extends ViewModel {
     }
 
     public void searchBySol(int sol){
-        String solSearch = sol + SOL_QUERY_APPEND;
+        mCurrentSol = sol;
+        String solSearch = mCurrentSol + SOL_QUERY_APPEND;
         Call<InsightResponse> insightCall = mApiService.getPhotosBySol(MISSION_QUERY_APPEND, solSearch);
         insightCall.enqueue(new Callback<InsightResponse>() {
             @Override
