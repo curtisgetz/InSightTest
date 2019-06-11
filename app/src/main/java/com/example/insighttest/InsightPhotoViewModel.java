@@ -74,15 +74,15 @@ public class InsightPhotoViewModel extends ViewModel {
     }
 
     public void searchPrevSol(){
-        if(mCurrentSol == 0) {
-            searchBySol(mCurrentSol);
-        }else{
-            searchBySol(mCurrentSol--);
+        if(mCurrentSol > 0) {
+            mCurrentSol--;
         }
+        searchBySol(mCurrentSol);
     }
 
     public void searchNextSol(){
-        searchBySol(mCurrentSol++);
+        mCurrentSol++;
+        searchBySol(mCurrentSol);
     }
 
     public LiveData<InsightResponse> getInsightResponse(){

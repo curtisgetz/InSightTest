@@ -56,7 +56,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("LOG", "onChanged");
                 if(insightResponse != null){
                     if(insightResponse.getErrorMessage() != null){
-                        showFailure("No Photos On This Sol");
+                        String currentSol = String.valueOf(mViewModel.getCurrentSol());
+                        showFailure("No Photos On Sol " + currentSol);
                     }else {
                         List<InsightPhoto> photoList = insightResponse.getItems();
                         mAdapter.setData(photoList);
